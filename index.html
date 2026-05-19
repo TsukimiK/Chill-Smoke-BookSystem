@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chill Smoke Archive Preview</title>
+  <style>
+    :root{
+      --paper:#0f0d0b;
+      --paper-2:#2a211a;
+      --ink:#efe6d4;
+      --muted:#aa9a86;
+      --line:#3c3026;
+      --line-dark:#7d5f37;
+      --brown:#b1844d;
+      --brown-2:#d0a35b;
+      --cream:#1a1511;
+      --accent:#d7ad66;
+      --danger:#e16f62;
+      --radius:10px;
+      --shadow:0 10px 30px rgba(0,0,0,.34);
+    }
+    *{box-sizing:border-box}
+    html{overflow-y:scroll}
+    body{
+      margin:0;
+      min-height:100vh;
+      color:var(--ink);
+      font-family:"Yu Gothic",Meiryo,system-ui,sans-serif;
+      background:
+        linear-gradient(rgba(215,173,102,.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(215,173,102,.04) 1px, transparent 1px),
+        radial-gradient(circle at 18% 0%, rgba(125,95,55,.18), transparent 32%),
+        var(--paper);
+      background-size:28px 28px;
+    }
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    .wrap{width:min(1120px,calc(100% - 36px));margin:0 auto;padding:28px 0 56px}
+    .hero{
+      border:1px solid var(--line);
+      border-left:6px solid var(--brown-2);
+      border-radius:var(--radius);
+      background:rgba(26,21,17,.9);
+      box-shadow:var(--shadow);
+      padding:18px 20px;
+      margin:0 0 14px;
+    }
+    .eyebrow{
+      margin:0 0 8px;
+      color:var(--accent);
+      letter-spacing:.16em;
+      font-size:.72rem;
+      font-weight:800;
+      text-transform:uppercase;
+    }
+    .hero h1{
+      margin:0;
+      font-family:Georgia,"Times New Roman",serif;
+      font-size:clamp(2rem,3.6vw,3.4rem);
+      line-height:1.05;
+      font-weight:500;
+      letter-spacing:.012em;
+    }
+    .lead,.badge,.dot{display:none}
+    .tabs{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:0;
+      margin:0 0 14px;
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:var(--cream);
+      width:100%;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+    }
+    .tab{
+      border:0;
+      border-right:1px solid var(--line);
+      background:transparent;
+      color:var(--muted);
+      padding:12px 18px;
+      font-weight:700;
+      white-space:nowrap;
+      text-align:center;
+    }
+    .tab:last-child{border-right:0}
+    .tab.active{background:var(--accent);color:#15100d}
+    main{width:100%}
+    .view{display:none;width:100%}
+    .view.active{display:block}
+    .panel{
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:rgba(26,21,17,.9);
+      box-shadow:var(--shadow);
+    }
+    .toolbar{
+      padding:16px;
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:14px;
+      align-items:end;
+      margin:0;
+    }
+    .search label,.filters label,.form label{
+      display:grid;
+      gap:7px;
+      color:var(--muted);
+      font-size:.84rem;
+      font-weight:700;
+    }
+    .search input,.filters select,.form input,.form select,.form textarea{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:8px;
+      background:#211b16;
+      color:var(--ink);
+      padding:11px 12px;
+      outline:none;
+    }
+    .search input:focus,.filters select:focus,.form input:focus,.form select:focus,.form textarea:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 3px rgba(215,173,102,.16);
+    }
+    .filters{display:flex;gap:10px;align-items:end}
+    .ghost,.primary,.danger{
+      border:1px solid var(--line-dark);
+      border-radius:8px;
+      padding:11px 15px;
+      font-weight:800;
+      color:var(--ink);
+      background:#211b16;
+    }
+    .primary{background:var(--accent);color:#15100d;border-color:var(--accent)}
+    .ghost{background:#211b16;color:var(--ink)}
+    .danger{background:#2a1715;color:#ffb0a8;border-color:#7e332d}
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:10px;
+      margin:14px 0;
+    }
+    .stat{
+      padding:13px 14px;
+      border:1px solid var(--line);
+      border-radius:8px;
+      background:#1a1511;
+    }
+    .stat span{display:block;font-size:1.45rem;color:var(--accent);font-weight:900;line-height:1.1}
+    .stat small{color:var(--muted)}
+    .tableWrap{overflow:auto;background:#1a1511}
+    .archiveTable{width:100%;border-collapse:collapse;min-width:680px}
+    .archiveTable th,.archiveTable td{padding:14px 16px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+    .archiveTable th{background:#241e19;color:var(--accent);font-weight:800;white-space:nowrap}
+    .archiveTable td{color:var(--ink)}
+    .archiveTable tbody tr:hover td{background:#211b16}
+    .archiveTable .nameCell{font-family:Georgia,"Times New Roman",serif;font-size:1.08rem;font-weight:600;color:#f1d49b}
+    .archiveTable .actionCell{white-space:nowrap;text-align:right}
+    .archiveTable .pill{display:inline-block}
+    .card{
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:#1a1511;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+    }
+    .imgs{display:grid;grid-template-columns:1fr 1fr;gap:0;background:var(--line)}
+    .imgbox{position:relative;aspect-ratio:4/3;background:#2a241f;overflow:hidden}
+    .imgbox+ .imgbox{border-left:1px solid var(--line)}
+    .imgbox img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.96) contrast(.98)}
+    .imgbox b{
+      position:absolute;
+      left:8px;
+      top:8px;
+      background:rgba(0,0,0,.72);
+      padding:4px 7px;
+      border-radius:4px;
+      font-size:.68rem;
+      color:#f4ead7;
+      letter-spacing:.04em;
+    }
+    .body{padding:15px 16px 16px}
+    .body h3{
+      margin:0 0 9px;
+      font-family:Georgia,"Times New Roman",serif;
+      font-size:1.32rem;
+      font-weight:600;
+    }
+    .meta{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+    .pill{
+      font-size:.72rem;
+      border:1px solid var(--line);
+      border-radius:4px;
+      padding:4px 7px;
+      color:#f1d49b;
+      background:#241e19;
+    }
+    .desc{color:var(--muted);line-height:1.7;min-height:3.2em;margin:0}
+    .card .actions{display:flex;gap:8px;margin-top:14px}
+    .admin{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(280px,.88fr);gap:16px}
+    .admin.single{display:block;width:100%}
+    .admin.single .form{width:100%}
+    .form,.list{padding:16px}
+    .form h2,.list h2{margin:0 0 14px;font-family:Georgia,"Times New Roman",serif;font-weight:500}
+    .twocol{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .form form{display:grid;gap:13px}
+    .preview{
+      min-height:104px;
+      border:1px dashed #6e5841;
+      border-radius:8px;
+      background:#201a15;
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+      color:var(--muted);
+      font-size:.86rem;
+    }
+    .preview img{width:100%;height:165px;object-fit:cover}
+    .row{display:flex;gap:9px;flex-wrap:wrap}
+    .adminItem{
+      padding:13px;
+      border:1px solid var(--line);
+      border-radius:8px;
+      background:#211b16;
+      margin-bottom:10px;
+    }
+    .adminItem strong{display:block;margin-bottom:6px;font-family:Georgia,"Times New Roman",serif;font-size:1.05rem}
+    .adminItem small{color:var(--muted)}
+    .guide{padding:22px;line-height:1.9;color:var(--muted)}
+    .guide h2{margin-top:0;font-family:Georgia,"Times New Roman",serif;font-weight:500;color:var(--ink)}
+    code{color:#f1d49b;background:#2a211a;padding:.12rem .34rem;border-radius:4px}
+    .empty{padding:34px;text-align:center;color:var(--muted)}
+    dialog{
+      border:1px solid var(--line-dark);
+      border-radius:12px;
+      background:#17120f;
+      color:var(--ink);
+      width:min(860px,calc(100% - 28px));
+      box-shadow:0 18px 60px rgba(33,24,18,.28);
+    }
+    dialog::backdrop{background:rgba(0,0,0,.72)}
+    .close{position:absolute;right:12px;top:10px;border:1px solid var(--line);border-radius:999px;width:34px;height:34px;background:#211b16;color:var(--ink)}
+    .detailImgs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}
+    .detailImgs img{width:100%;border-radius:8px;aspect-ratio:4/3;object-fit:cover;background:#2a241f;border:1px solid var(--line)}
+    .imageLinks{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:-6px 0 18px}
+    .imageLinks a{display:block;border:1px solid var(--line);border-radius:8px;background:#211b16;color:#f1d49b;padding:10px 12px;text-decoration:none;font-weight:800;text-align:center}
+    .imageLinks a:hover{background:#2a211a}
+    .imageLinks .disabled{display:block;border:1px solid var(--line);border-radius:8px;background:#201a15;color:var(--muted);padding:10px 12px;text-align:center;font-weight:800}
+    @media(max-width:820px){.toolbar,.admin{grid-template-columns:1fr}.filters{overflow:auto}.tabs{grid-template-columns:1fr}.tab{border-right:0;border-bottom:1px solid var(--line)}.tab:last-child{border-bottom:0}.stats{grid-template-columns:1fr}.twocol,.detailImgs,.imageLinks{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <div><p class="eyebrow">CIGARETTE SHOP HISTORY</p><h1>Chill Smoke Archive</h1></div>
+    </header>
+    <nav class="tabs"><button class="tab active" data-view="archive">アーカイブ</button><button class="tab" data-view="admin">登録</button><button class="tab" data-view="guide">使い方</button></nav>
+    <main>
+      <section id="archive" class="view active">
+        <section class="toolbar panel"><div class="search"><label>商品検索<input id="q" type="search" placeholder="商品名・説明・メモで検索"></label></div><div class="filters"><label>区分<select id="type"><option value="all">すべて</option><option>恒常商品</option><option>限定商品</option></select></label><label>バージョン<select id="version"><option value="all">すべて</option><option>ベータ</option><option>本リリースv1</option><option>本リリースv2</option></select></label><button class="ghost" id="clear">解除</button></div></section>
+        <div class="stats"><div class="stat"><span id="total">0</span><small>総商品数</small></div><div class="stat"><span id="regular">0</span><small>恒常商品</small></div><div class="stat"><span id="limited">0</span><small>限定商品</small></div></div>
+        <div id="tableWrap" class="panel tableWrap"><table class="archiveTable"><thead><tr><th>商品名</th><th>区分</th><th>バージョン</th><th>操作</th></tr></thead><tbody id="grid"></tbody></table></div><div id="empty" class="panel empty" style="display:none">まだ商品がありません。「登録」から追加できます。</div>
+      </section>
+      <section id="admin" class="view"><div class="admin single"><section class="panel form"><p class="eyebrow">MANAGE</p><h2 id="formTitle">商品登録</h2><form id="form"><input id="id" type="hidden"><label>商品名<input id="name" required placeholder="例：ENDING"></label><div class="twocol"><label>区分<select id="inType"><option>恒常商品</option><option>限定商品</option></select></label><label>バージョン<select id="inVersion"><option>ベータ</option><option>本リリースv1</option><option>本リリースv2</option></select></label></div><label>開封前画像リンク<input id="before" type="url" placeholder="Google Drive共有リンク or 画像URL"></label><div id="beforePrev" class="preview">開封前プレビュー</div><label>開封後画像リンク<input id="after" type="url" placeholder="Google Drive共有リンク or 画像URL"></label><div id="afterPrev" class="preview">開封後プレビュー</div><label>商品説明<textarea id="desc" rows="4" placeholder="商品の説明・キャッチコピー"></textarea></label><label>メモ<textarea id="memo" rows="3" placeholder="制作背景、コラボ先、変更点など"></textarea></label><div class="row"><button class="primary" type="submit" id="saveBtn">登録</button><button class="ghost" type="button" id="new">入力をクリア</button></div></form></section></div></section>
+      <section id="guide" class="view"><section class="panel guide"><p class="eyebrow">GUIDE</p><h2>Google Drive画像リンクの使い方</h2><ol><li>Google Driveに画像をアップロードします。</li><li>画像を右クリックして「共有」または「リンクを取得」を開きます。</li><li>共有設定を「リンクを知っている全員が閲覧可」にします。</li><li>共有リンクをコピーして、このアプリの画像リンク欄に貼ります。</li><li>アプリ側で <code>https://drive.google.com/thumbnail?id=...&amp;sz=w1200</code> 形式に自動変換して表示します。</li></ol></section></section>
+    </main>
+  </div>
+  <dialog id="dialog"><button class="close" id="close">×</button><div id="dialogContent"></div></dialog>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script>
+const KEY="chill-smoke-preview-v1";
+
+const FIREBASE_CONFIG={
+  apiKey:"AIzaSyApkZW4kHFOFcHRKzNDa7vGNkVT6y3McSE",
+  authDomain:"chillsmokebooksystem-468bd.firebaseapp.com",
+  projectId:"chillsmokebooksystem-468bd",
+  storageBucket:"chillsmokebooksystem-468bd.firebasestorage.app",
+  messagingSenderId:"636248645330",
+  appId:"1:636248645330:web:e09a72397287c5be92d70b",
+  measurementId:"G-LJR7VDMN9G"
+};
+const FIREBASE_COLLECTION="products";
+
+const $=s=>document.querySelector(s);
+const useFirebase=Boolean(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId && window.firebase);
+let db=null;
+let firebaseAuthReady=false;
+
+if(useFirebase){
+  firebase.initializeApp(FIREBASE_CONFIG);
+  db=firebase.firestore();
+}
+
+const svg=(t,sub,c1,c2)=>`data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820"><rect width="1200" height="820" fill="#15110e"/><rect x="70" y="70" width="1060" height="680" rx="18" fill="#1f1914" stroke="#4a392b" stroke-width="4"/><rect x="115" y="120" width="970" height="590" rx="10" fill="#2a211a" stroke="#3c3026" stroke-width="2"/><rect x="390" y="150" width="420" height="520" rx="20" fill="${c1}" stroke="#d0a35b" stroke-width="6"/><rect x="430" y="198" width="340" height="424" rx="10" fill="none" stroke="#f1d49b" stroke-opacity=".35" stroke-width="3"/><line x1="430" y1="270" x2="770" y2="270" stroke="#f1d49b" stroke-opacity=".35" stroke-width="2"/><text x="600" y="438" text-anchor="middle" font-family="Georgia,serif" font-size="70" fill="#1f1914" letter-spacing="4">${t}</text><text x="600" y="493" text-anchor="middle" font-family="Yu Gothic,sans-serif" font-size="24" fill="#2a211a" letter-spacing="7">${sub}</text><text x="600" y="690" text-anchor="middle" font-family="Yu Gothic,sans-serif" font-size="22" fill="#aa9a86" letter-spacing="5">ARCHIVE SAMPLE</text></svg>`)}`;
+
+let items=[];
+const sampleItems=[
+{id:"ending",name:"ENDING",type:"限定商品",version:"本リリースv2",beforeImage:svg("ENDING","BEFORE","#102c66","#080713"),afterImage:svg("ENDING","OPENED","#162f4e","#30102d"),description:"夜空を横切る彗星のように、静かに広がるアイスミントの余韻。",memo:"プレビュー用サンプルです。実運用ではGoogle Drive共有リンクを貼ります。"},
+{id:"eclipse",name:"Eclipse teller",type:"恒常商品",version:"本リリースv1",beforeImage:svg("ECLIPSE","BEFORE","#1a95c9","#07122b"),afterImage:svg("ECLIPSE","OPENED","#0b5470","#180c39"),description:"皆既日食と星の余韻を閉じ込めた、静かなブルーのパッケージ。",memo:"検索・フィルター・詳細表示の動作確認用。"}
+];
+
+const esc=v=>String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));
+const localId=()=>`item_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+
+function fromFirestore(doc){
+  const row=doc.data()||{};
+  return {id:doc.id,name:row.name||"",type:row.type||"恒常商品",version:row.version||"ベータ",beforeImage:row.beforeImage||"",afterImage:row.afterImage||"",description:row.description||"",memo:row.memo||""};
+}
+function toFirestore(item){
+  return {name:item.name,type:item.type,version:item.version,beforeImage:item.beforeImage||"",afterImage:item.afterImage||"",description:item.description||"",memo:item.memo||"",updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
+}
+
+async function ensureFirebaseAuth(){
+  if(!useFirebase || firebaseAuthReady) return;
+  if(!firebase.auth().currentUser){
+    await firebase.auth().signInAnonymously();
+  }
+  firebaseAuthReady=true;
+}
+
+function driveId(url){url=String(url||"");for(const p of [/drive\.google\.com\/file\/d\/([^/]+)/,/drive\.google\.com\/open\?id=([^&]+)/,/drive\.google\.com\/uc\?id=([^&]+)/,/drive\.google\.com\/thumbnail\?id=([^&]+)/,/[?&]id=([^&]+)/]){const m=url.match(p);if(m) return decodeURIComponent(m[1])}return""}
+function imgUrl(url){url=String(url||"").trim();if(!url)return"";if(url.includes("drive.google.com")){const d=driveId(url);if(d)return`https://drive.google.com/thumbnail?id=${encodeURIComponent(d)}&sz=w1200`}return url}
+
+async function loadItems(){
+  if(useFirebase){
+    try{
+      await ensureFirebaseAuth();
+      const snap=await db.collection(FIREBASE_COLLECTION).orderBy("createdAt","desc").get();
+      items=snap.docs.map(fromFirestore);
+      render();
+      return;
+    }catch(error){
+      alert("DB読み込みエラー: "+error.message);
+      items=[];
+      render();
+      return;
+    }
+  }
+  items=JSON.parse(localStorage.getItem(KEY)||"null")||sampleItems;
+  render();
+}
+
+async function saveItem(item){
+  if(useFirebase){
+    await ensureFirebaseAuth();
+    if(item.id && !String(item.id).startsWith("item_")){
+      await db.collection(FIREBASE_COLLECTION).doc(item.id).update(toFirestore(item));
+    }else{
+      await db.collection(FIREBASE_COLLECTION).add({...toFirestore(item),createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    }
+    await loadItems();
+    return;
+  }
+  const idx=items.findIndex(x=>x.id===item.id);
+  idx>=0?items[idx]=item:items.unshift(item);
+  localStorage.setItem(KEY,JSON.stringify(items,null,2));
+  render();
+}
+
+async function deleteItem(id){
+  if(useFirebase){
+    try{
+      await ensureFirebaseAuth();
+      await db.collection(FIREBASE_COLLECTION).doc(id).delete();
+      await loadItems();
+      return;
+    }catch(error){
+      alert("DB削除エラー: "+error.message);
+      return;
+    }
+  }
+  items=items.filter(x=>x.id!==id);
+  localStorage.setItem(KEY,JSON.stringify(items,null,2));
+  render();
+}
+
+function filtered(){const q=$("#q").value.toLowerCase().trim(),t=$("#type").value,v=$("#version").value;return items.filter(x=>(t==="all"||x.type===t)&&(v==="all"||x.version===v)&&[x.name,x.description,x.memo].join(" ").toLowerCase().includes(q))}
+function render(){const arr=filtered();$("#total").textContent=items.length;$("#regular").textContent=items.filter(x=>x.type==="恒常商品").length;$("#limited").textContent=items.filter(x=>x.type==="限定商品").length;$("#empty").style.display=arr.length?"none":"block";$("#tableWrap").style.display=arr.length?"block":"none";$("#grid").innerHTML=arr.map(x=>`<tr><td class="nameCell">${esc(x.name)}</td><td><span class="pill">${esc(x.type)}</span></td><td><span class="pill">${esc(x.version)}</span></td><td class="actionCell"><button class="ghost" onclick="detail('${x.id}')">詳細</button><button class="ghost" onclick="edit('${x.id}')">編集</button></td></tr>`).join("")}
+function detail(i){const x=items.find(a=>String(a.id)===String(i));if(!x)return;const beforeView=imgUrl(x.beforeImage),afterView=imgUrl(x.afterImage);const beforeLink=x.beforeImage||beforeView,afterLink=x.afterImage||afterView;$("#dialogContent").innerHTML=`<h2>${esc(x.name)}</h2><div class="meta"><span class="pill">${esc(x.type)}</span><span class="pill">${esc(x.version)}</span></div><div class="detailImgs"><img src="${esc(beforeView)}"><img src="${esc(afterView)}"></div><div class="imageLinks">${beforeLink?`<a href="${esc(beforeLink)}" target="_blank" rel="noopener noreferrer">開封前画像を開く</a>`:`<span class="disabled">開封前リンクなし</span>`}${afterLink?`<a href="${esc(afterLink)}" target="_blank" rel="noopener noreferrer">開封後画像を開く</a>`:`<span class="disabled">開封後リンクなし</span>`}</div><p>${esc(x.description)}</p>${x.memo?`<p style="color:var(--muted)">${esc(x.memo)}</p>`:""}`;$("#dialog").showModal()}
+function edit(i){const x=items.find(a=>String(a.id)===String(i));if(!x)return;show("admin");$("#formTitle").textContent="商品編集";$("#saveBtn").textContent="更新";$("#id").value=x.id;$("#name").value=x.name;$("#inType").value=x.type;$("#inVersion").value=x.version;$("#before").value=x.beforeImage||"";$("#after").value=x.afterImage||"";$("#desc").value=x.description||"";$("#memo").value=x.memo||"";preview()}
+async function delItem(i){if(confirm("削除しますか？")){await deleteItem(i)}}
+function clearForm(){$("#form").reset();$("#id").value="";$("#formTitle").textContent="商品登録";$("#saveBtn").textContent="登録";preview()}
+function preview(){const b=imgUrl($("#before").value),a=imgUrl($("#after").value);$("#beforePrev").innerHTML=b?`<img src="${esc(b)}">`:"開封前プレビュー";$("#afterPrev").innerHTML=a?`<img src="${esc(a)}">`:"開封後プレビュー"}
+function show(v){document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x.dataset.view===v));$("#"+v).classList.add("active")}
+
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{if(b.dataset.view==="admin") clearForm();show(b.dataset.view)});
+["#q","#type","#version"].forEach(s=>$(s).addEventListener("input",render));
+$("#clear").onclick=()=>{$("#q").value="";$("#type").value="all";$("#version").value="all";render()};
+$("#before").addEventListener("input",preview);
+$("#after").addEventListener("input",preview);
+$("#new").onclick=clearForm;
+$("#form").onsubmit=async e=>{e.preventDefault();const editingId=$("#id").value;const item={id:editingId||localId(),name:$("#name").value.trim(),type:$("#inType").value,version:$("#inVersion").value,beforeImage:$("#before").value.trim(),afterImage:$("#after").value.trim(),description:$("#desc").value.trim(),memo:$("#memo").value.trim()};try{await saveItem(item);clearForm();show("archive")}catch(error){alert("保存エラー: "+error.message)}};
+$("#close").onclick=()=>$("#dialog").close();
+loadItems();
+</script>
+</body>
+</html>
