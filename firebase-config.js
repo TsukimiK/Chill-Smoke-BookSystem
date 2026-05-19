@@ -9,18 +9,13 @@
   ADMIN_PIN は仲間内向けの簡易ロックです。
   フロントエンド内に入るため、本格的なセキュリティにはなりません。
 */
-window.CHILL_SMOKE_CONFIG = {
-  ADMIN_PIN: "change-me",
-
-  FIREBASE_CONFIG: {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  },
-
-  FIRESTORE_COLLECTION: "products",
-  STORAGE_FOLDER: "chill-smoke-archive"
+const firebaseConfig = {
+  apiKey: "AIzaSyAmSyHfjfSjle3JrSv48P1emDWu1w91mA4",
+  authDomain: "chillsmokebooksystem.firebaseapp.com",
+  projectId: "chillsmokebooksystem",
+  storageBucket: "chillsmokebooksystem.firebasestorage.app",
+  messagingSenderId: "934573767642",
+  appId: "1:934573767642:web:d7dbb09c40a6579e161ee3",
+  measurementId: "G-Z7TPVZMWHP"
 };
+const ADMIN_PIN = "8229";
