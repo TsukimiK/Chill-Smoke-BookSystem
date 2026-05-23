@@ -198,21 +198,28 @@ function columnPreview(){const img=imgUrl($("#ownerImage").value);$("#ownerImage
 function confirmDelete(title,text,onYes){$("#dialogContent").innerHTML=`<div class="confirmBox"><h2>${esc(title)}</h2><p>${esc(text)}</p><div class="confirmActions"><button class="ghost" id="cancelDelete" type="button">いいえ</button><button class="danger" id="yesDelete" type="button">はい、削除する</button></div></div>`;$("#dialog").showModal();$("#cancelDelete").onclick=()=>$("#dialog").close();$("#yesDelete").onclick=async()=>{$("#yesDelete").disabled=true;$("#yesDelete").textContent="削除中...";try{await onYes();$("#dialog").close()}catch(error){alert("削除エラー: "+error.message);$("#yesDelete").disabled=false;$("#yesDelete").textContent="はい、削除する"}}}
 
 
-function preventEnterSubmit(formSelector){
+function lockEnterAndSubmit(formSelector){
   const form=$(formSelector);
   if(!form)return;
-  form.addEventListener("keydown",e=>{
-    if(e.key==="Enter" && !e.shiftKey && e.target && e.target.tagName!=="TEXTAREA"){
-      e.preventDefault();
-    }
+  form.addEventListener("submit",e=>{
+    e.preventDefault();
+    e.stopPropagation();
   });
+  form.addEventListener("keydown",e=>{
+    if(e.key!=="Enter")return;
+    const tag=(e.target&&e.target.tagName||"").toUpperCase();
+    const allowTextareaNewline=tag==="TEXTAREA" && e.shiftKey;
+    if(allowTextareaNewline)return;
+    e.preventDefault();
+    e.stopPropagation();
+  },true);
 }
 let productSaving=false;
 let eventSaving=false;
 let columnSaving=false;
-preventEnterSubmit("#form");
-preventEnterSubmit("#eventForm");
-preventEnterSubmit("#columnForm");
+lockEnterAndSubmit("#form");
+lockEnterAndSubmit("#eventForm");
+lockEnterAndSubmit("#columnForm");
 
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>show(b.dataset.view));
 document.querySelectorAll(".subTab").forEach(b=>b.onclick=()=>{const g=b.dataset.subgroup,v=b.dataset.subview;if(g==="product"&&v==="productFormPane")clearForm();if(g==="event"&&v==="eventFormPane")clearEventForm();if(g==="column"&&v==="columnFormPane")clearColumnForm();showSub(g,v)});
@@ -229,8 +236,7 @@ $("#productDeleteBtn").onclick=()=>confirmDelete("商品を削除しますか？
 $("#columnDeleteBtn").onclick=()=>confirmDelete("コラムを削除しますか？",`「${$("#columnTitle").value||"このコラム"}」を削除します。`,async()=>{await deleteColumn($("#columnId").value);clearColumnForm();show("columns");showSub("column","columnListPane")});
 $("#eventList").addEventListener("click",async e=>{const editBtn=e.target.closest(".event-edit-btn"),deleteBtn=e.target.closest(".event-delete-btn");if(editBtn){editEvent(editBtn.dataset.id);return}if(deleteBtn){if(deleteBtn.dataset.confirm!=="true"){document.querySelectorAll(".event-delete-btn").forEach(b=>{b.dataset.confirm="false";b.textContent="削除"});deleteBtn.dataset.confirm="true";deleteBtn.textContent="もう一度押す";setTimeout(()=>{if(deleteBtn.dataset.confirm==="true"){deleteBtn.dataset.confirm="false";deleteBtn.textContent="削除"}},3000);return}await deleteEvent(deleteBtn.dataset.id)}});
 $("#columnList").addEventListener("click",e=>{const editBtn=e.target.closest(".column-edit-btn"),deleteBtn=e.target.closest(".column-delete-btn");if(editBtn){editColumn(editBtn.dataset.id);return}if(deleteBtn)confirmDelete("コラムを削除しますか？","削除後は元に戻せません。",async()=>deleteColumn(deleteBtn.dataset.id))});
-$("#form").onsubmit=async e=>{
-  e.preventDefault();
+async function saveProductForm(){
   if(productSaving)return;
   productSaving=true;
   const saveBtn=$("#saveBtn");
@@ -251,8 +257,7 @@ $("#form").onsubmit=async e=>{
     saveBtn.textContent=beforeText;
   }
 };
-$("#eventForm").onsubmit=async e=>{
-  e.preventDefault();
+async function saveEventForm(){
   if(eventSaving)return;
   const dateValue=getEventDateRangeFromInputs();
   if(!isEventDateRange(dateValue)){alert("開催期間を正しく入力してください。例：開始 2026 / 05 / 19、終了 2026 / 05 / 20");$("#eventStartYear").focus();return}
@@ -270,8 +275,7 @@ $("#eventForm").onsubmit=async e=>{
   }catch(error){alert("イベント保存エラー: "+error.message)}
   finally{eventSaving=false;saveBtn.disabled=false;saveBtn.textContent=beforeText}
 };
-$("#columnForm").onsubmit=async e=>{
-  e.preventDefault();
+async function saveColumnForm(){
   if(columnSaving)return;
   columnSaving=true;
   const saveBtn=$("#columnSaveBtn");
@@ -287,5 +291,9 @@ $("#columnForm").onsubmit=async e=>{
   }catch(error){alert("コラム保存エラー: "+error.message)}
   finally{columnSaving=false;saveBtn.disabled=false;saveBtn.textContent=beforeText}
 };
+
+$("#saveBtn").onclick=saveProductForm;
+$("#eventSaveBtn").onclick=saveEventForm;
+$("#columnSaveBtn").onclick=saveColumnForm;
 
 loadItems();loadEvents();loadColumns();
