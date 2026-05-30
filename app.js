@@ -95,6 +95,57 @@ function imgUrl(url){
   return url;
 }
 
+
+function canvaExportPrice(value){
+  const raw=String(value||"").trim();
+  if(!raw)return "";
+  const normalized=raw.replace(/[,円￥\s]/g,"");
+  const numberValue=Number(normalized);
+  return normalized&&Number.isFinite(numberValue)?numberValue:raw;
+}
+function pickCanvaMainImage(item){
+  return item.beforeImage||item.afterImage||item.popImage||"";
+}
+function makeCanvaProductPayload(){
+  return items.map((item,index)=>{
+    const mainImage=pickCanvaMainImage(item);
+    const previewImage=item.popImage||item.beforeImage||item.afterImage||"";
+    return {
+      id:String(item.id||`product-${index+1}`),
+      name:String(item.name||""),
+      description:String(item.description||""),
+      price:canvaExportPrice(item.price),
+      effect:String(item.effect||""),
+      category:String(item.type||""),
+      version:String(item.version||""),
+      period:"",
+      imageUrl:imgUrl(mainImage),
+      thumbnailUrl:imgUrl(previewImage),
+      beforeImage:imgUrl(item.beforeImage||""),
+      afterImage:imgUrl(item.afterImage||""),
+      popImage:imgUrl(item.popImage||""),
+      memo:String(item.memo||"")
+    };
+  });
+}
+function downloadTextFile(filename,text,mimeType="application/json"){
+  const blob=new Blob([text],{type:`${mimeType};charset=utf-8`});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function exportCanvaJson(){
+  const payload=makeCanvaProductPayload();
+  const json=JSON.stringify(payload,null,2);
+  downloadTextFile("products.json",json);
+  alert(`Canva用JSONを書き出しました。\n商品数: ${payload.length}\nCanva連携アプリの server/data/products.json に入れてください。`);
+}
+
 function normalizeEventDateRange(value){return String(value||"").trim().replaceAll(" ","").replaceAll("　","").replaceAll("～","~")}
 function isYmd(value){
   const p=String(value||"").split("/");
@@ -243,6 +294,7 @@ document.querySelectorAll(".subTab").forEach(b=>b.onclick=()=>{const g=b.dataset
 ["#eventQ","#eventCategoryFilter","#eventVersionFilter"].forEach(s=>$(s).addEventListener("input",renderEvents));
 ["#popQ","#popVersionFilter"].forEach(s=>$(s).addEventListener("input",renderPopGallery));
 $("#clear").onclick=()=>{$("#q").value="";$("#type").value="all";$("#version").value="all";$("#imageFilter").value="all";render()};
+$("#exportCanvaJson").onclick=exportCanvaJson;
 $("#eventFilterClear").onclick=()=>{$("#eventQ").value="";$("#eventCategoryFilter").value="all";$("#eventVersionFilter").value="all";renderEvents()};
 $("#popFilterClear").onclick=()=>{$("#popQ").value="";$("#popVersionFilter").value="all";renderPopGallery()};
 $("#before").addEventListener("input",preview);$("#after").addEventListener("input",preview);$("#pop").addEventListener("input",preview);$("#eventImage").addEventListener("input",eventPreview);$("#ownerImage").addEventListener("input",columnPreview);
